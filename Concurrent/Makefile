@@ -1,9 +1,9 @@
 thread:
 	gcc -o $@ $@.m -framework Foundation
 
-NSThread:
+nsthread:
 	gcc -o $@ $@.m -framework Foundation
 
 clean:
 	-@rm thread
-	-@rm NSThread
+	-@rm nsthread
