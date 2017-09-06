@@ -3,6 +3,7 @@
 @interface FindMinMaxThread : NSThread
 @property (nonatomic) NSUInteger min;
 @property (nonatomic) NSUInteger max;
+@property (nonatomic) BOOL isFinished;
 - (instancetype)initWithNumbers:(NSArray *)numbers;
 @end
 
@@ -32,6 +33,9 @@
 
     self.min = min;
     self.max = max;
+    self.isFinished = YES;
+
+    NSLog(@"%@ finished", [self name]);
 }
 
 @end
@@ -43,18 +47,9 @@ int main(void) {
         [numbers addObject:num];
     }
 
-    NSMutableSet *threads = [NSMutableSet set];
+    NSMutableArray *threads = [NSMutableArray array];
     NSUInteger numberCount = numbers.count;
 	NSUInteger threadCount = 4;
-    for (NSUInteger i = 0; i < threadCount; i++) {
-        NSUInteger offset = (numberCount / threadCount) * i;
-        NSUInteger count = MIN(numberCount - offset, numberCount / threadCount);
-        NSRange range = NSMakeRange(offset, count);
-        NSArray *subset = [numbers subarrayWithRange:range];
-        FindMinMaxThread *thread = [[FindMinMaxThread alloc] initWithNumbers:subset];
-        [threads addObject:thread];
-        [thread start];
-    }
 
     for (NSUInteger i = 0; i < threadCount; i++) {
         NSUInteger offset = (numberCount / threadCount) * i;
@@ -66,18 +61,23 @@ int main(void) {
         [thread start];
     }
 
-    NSUInteger max;
-    NSUInteger min;
+    NSUInteger max = 0;
+    NSUInteger min = NSIntegerMax;
     BOOL isFinished = NO;
     while (!isFinished) {
-        for (FindMinMaxThread *th in threads) {
-            if (th.min == nil || th.max == nil) {
-                break;
+        for (int i = 0; i < threads.count; i++) {
+        /* for (FindMinMaxThread *th in threads) { */
+            FindMinMaxThread *th = threads[i];
+            if (i == 0) {
+                isFinished = th.isFinished;;
+            } else {
+                isFinished = isFinished && th.isFinished;
             }
 
-            isFinished = YES;
-            max = th.max;
-            min = th.min;
+            if (isFinished) {
+                min = MIN(min, th.min);
+                max = MAX(max, th.max);
+            }
         }
     }
 
