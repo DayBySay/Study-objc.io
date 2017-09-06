@@ -3,3 +3,7 @@ thread:
 
 NSThread:
 	gcc -o $@ $@.m -framework Foundation
+
+clean:
+	-@rm thread
+	-@rm NSThread
